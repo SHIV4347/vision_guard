@@ -34,12 +34,4 @@ CREATE TABLE cameras (
 );
 
 
-select * from users
-select * from security_personnel
-select * from criminals
-select * from cameras
-
-ALTER TABLE Criminals ADD face_id VARCHAR(255)
-
-DELETE FROM criminals;
 
