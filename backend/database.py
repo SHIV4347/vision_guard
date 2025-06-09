@@ -3,7 +3,7 @@ import pyodbc
 def get_db_connection():
     conn = pyodbc.connect(
         'Driver={SQL Server};'
-        'Server=SHIVPRASAD\\SQLEXPRESS;'
+        'Server=#put your credentials here
         'Database=model;'
         'Trusted_Connection=yes;'
     )
