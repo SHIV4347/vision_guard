@@ -16,8 +16,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend')))
 from detection import load_criminal_encodings
 
-TELEGRAM_BOT_TOKEN = '8117158223:AAFUGkF1VuH7Pda2hq5mktihuu6iLw8dqgw'
-TELEGRAM_CHAT_ID = '1539568940'
+TELEGRAM_BOT_TOKEN = #put your bot token here
+TELEGRAM_CHAT_ID = #put your chat id here
 
 app = Flask(__name__)
 CORS(app)
