@@ -50,6 +50,28 @@ def load_criminal_encodings():
                 print(f"[✓] Loaded: {filename} as {name}")
             else:
                 print(f"[x] No face found in: {filename}")
+                
+def detect_criminal(frame):
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_locations = face_recognition.face_locations(rgb_frame)
+    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+     
+    print(f"👁️ Detected {len(face_encodings)} face(s) in current frame.")
+
+    matches = []
+    for face_encoding, location in zip(face_encodings, face_locations):
+        results = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.5)
+        print("   ➜ Match results:", results)
+
+        if True in results:
+            match_index = results.index(True)
+            name = known_names[match_index]
+            face_id = name.lower().replace(" ", "_") 
+            matches.append(name)
+
+            send_criminal_alert(name, face_id, frame)
+
+    return matches
 
 
 def send_criminal_alert(name, face_id, frame):
@@ -82,24 +104,3 @@ def send_criminal_alert(name, face_id, frame):
     except Exception as e:
         print(f"❌ Failed to send alert: {e}")
 
-def detect_criminal(frame):
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    face_locations = face_recognition.face_locations(rgb_frame)
-    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-     
-    print(f"👁️ Detected {len(face_encodings)} face(s) in current frame.")
-
-    matches = []
-    for face_encoding, location in zip(face_encodings, face_locations):
-        results = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.5)
-        print("   ➜ Match results:", results)
-
-        if True in results:
-            match_index = results.index(True)
-            name = known_names[match_index]
-            face_id = name.lower().replace(" ", "_") 
-            matches.append(name)
-
-            send_criminal_alert(name, face_id, frame)
-
-    return matches
