@@ -19,10 +19,10 @@ def add_criminal(data, photo_file):
         if not os.path.exists(CRIMINAL_IMAGES_FOLDER):
             os.makedirs(CRIMINAL_IMAGES_FOLDER)
 
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S') #e.g., 20250611123000
         original_filename = secure_filename(photo_file.filename)
         _, ext = os.path.splitext(original_filename)
-        filename = f"{data['name'].replace(' ', '_')}_{timestamp}{ext}"
+        filename = f"{data['name'].replace(' ', '_')}_{timestamp}{ext}" #shivprasad_mali_20250611123000.jpg
         filepath = os.path.join(CRIMINAL_IMAGES_FOLDER, filename)
 
         photo_file.save(filepath)
@@ -48,3 +48,10 @@ def add_criminal(data, photo_file):
 
     finally:
         conn.close()
+
+#summary:
+
+# Saves a criminal’s photo with a unique filename.
+# Stores their details and image path in a database.
+# Updates face encodings used for real-time recognition.
+# Handles errors gracefully and ensures cleanup.
