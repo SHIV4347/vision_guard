@@ -1,6 +1,6 @@
-import face_recognition
+import face_recognition # Deep learning library for face detection and comparison
 import os
-import cv2
+import cv2 # Image/video processing library : web cam, image saving
 import requests
 
 
