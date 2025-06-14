@@ -4,11 +4,12 @@ from database import get_db_connection
 from models import (
     validate_user,
     register_user,
-    add_criminal,
     add_security,
     get_security_contacts,
     get_criminal_by_face_id
 )
+
+from add_criminal import add_criminal
 from telegram_alert import send_telegram_alert
 
 import sys
@@ -16,8 +17,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend')))
 from detection import load_criminal_encodings
 
-TELEGRAM_BOT_TOKEN = #put your bot token here
-TELEGRAM_CHAT_ID = #put your chat id here
+TELEGRAM_BOT_TOKEN = '8117158223:AAFUGkF1VuH7Pda2hq5mktihuu6iLw8dqgw'
+TELEGRAM_CHAT_ID = '1539568940'
 
 app = Flask(__name__)
 CORS(app)
@@ -62,7 +63,7 @@ def register():
 @app.route('/add_criminal', methods=['POST'])
 def add_criminal_route():
     data = request.form.to_dict()
-    photo = request.files.get('photo')
+    photo = request.files.get('photo')1
 
     print(f"Received criminal data: {data}")
     print(f"Received file: {photo.filename if photo else 'No file'}")
@@ -148,3 +149,4 @@ def add_camera():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
