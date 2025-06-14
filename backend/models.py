@@ -37,20 +37,19 @@ def validate_user(email, password):
 def add_criminal(name, age, address, crimes, image_path):
     conn = get_db_connection()
     cursor = conn.cursor()
-
     face_id = name.lower().replace(" ", "_")
-
     try:
-        cursor.execute(
-            "INSERT INTO Criminals (name, age, address, crimes, image_path, face_id) VALUES (?, ?, ?, ?, ?, ?)",
-            (name, age, address, crimes, image_path, face_id)
-        )
+        cursor.execute("""
+            INSERT INTO criminals (name, age, address, crimes, image_path, face_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (name, age, address, crimes, image_path, face_id))
         conn.commit()
         return {"status": "success", "face_id": face_id}
     except Exception as e:
         return {"status": "error", "message": str(e)}
     finally:
         conn.close()
+
 
 def add_security(data):
     try:
