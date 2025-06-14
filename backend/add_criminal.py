@@ -3,55 +3,73 @@ import sys
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
+# Add backend folder to path
 backend_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
+# Import required logic
 from detection import load_criminal_encodings
-from database import get_connection
+from models import add_criminal as insert_criminal_into_db  # handles DB insert
 
+# Image folder
 CRIMINAL_IMAGES_FOLDER = os.path.join('static', 'criminal_images')
 
 def add_criminal(data, photo_file):
-    conn = get_connection()
-    cursor = conn.cursor()
     try:
+        print("[DEBUG] add_criminal called")
+
+        # Validate photo presence
+        if not photo_file:
+            print("[ERROR] photo_file is None")
+            return {"status": "fail", "message": "No file uploaded"}
+
+        print(f"[DEBUG] Received file: {photo_file.filename}")
+        if photo_file.filename == '':
+            print("[ERROR] Empty filename")
+            return {"status": "fail", "message": "Empty filename"}
+
+        # Validate file extension
+        _, ext = os.path.splitext(photo_file.filename)
+        if ext.lower() not in ['.jpg', '.jpeg', '.png']:
+            print("[ERROR] Invalid file type:", ext)
+            return {"status": "fail", "message": "Unsupported file type"}
+
+        # Create image folder if it doesn't exist
         if not os.path.exists(CRIMINAL_IMAGES_FOLDER):
             os.makedirs(CRIMINAL_IMAGES_FOLDER)
+            print(f"[DEBUG] Created folder: {CRIMINAL_IMAGES_FOLDER}")
+        else:
+            print(f"[DEBUG] Folder already exists: {CRIMINAL_IMAGES_FOLDER}")
 
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S') #e.g., 20250611123000
-        original_filename = secure_filename(photo_file.filename)
-        _, ext = os.path.splitext(original_filename)
-        filename = f"{data['name'].replace(' ', '_')}_{timestamp}{ext}" #shivprasad_mali_20250611123000.jpg
+        # Generate unique filename
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        filename = secure_filename(f"{data['name'].replace(' ', '_')}_{timestamp}{ext}")
         filepath = os.path.join(CRIMINAL_IMAGES_FOLDER, filename)
 
+        print(f"[DEBUG] Saving to filepath: {filepath}")
         photo_file.save(filepath)
 
-        cursor.execute("""
-            INSERT INTO criminals (name, age, address, crimes, image_path)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
+        if not os.path.exists(filepath):
+            print("[ERROR] File not saved!")
+            return {"status": "fail", "message": "File save failed"}
+
+        print("[DEBUG] File saved successfully.")
+
+        # Save to database
+        result = insert_criminal_into_db(
             data['name'],
             int(data['age']),
             data['address'],
             data['crimes'],
             filepath
-        ))
-        conn.commit()
+        )
 
+        # Reload encodings after adding new face
         load_criminal_encodings()
 
-        return {"status": "success"}
+        return result
 
     except Exception as e:
+        print("[EXCEPTION]", str(e))
         return {"status": "fail", "message": str(e)}
-
-    finally:
-        conn.close()
-
-#summary:
-
-# Saves a criminal’s photo with a unique filename.
-# Stores their details and image path in a database.
-# Updates face encodings used for real-time recognition.
-# Handles errors gracefully and ensures cleanup.
