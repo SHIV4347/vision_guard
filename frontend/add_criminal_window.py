@@ -10,6 +10,7 @@ if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
 from models import add_criminal
+import requests
 
 class AddCriminalWindow(QWidget):
     def __init__(self, username=None):
@@ -103,8 +104,9 @@ class AddCriminalWindow(QWidget):
     def upload_photo(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Photo", "", "Images (*.png *.jpg *.jpeg)")
         if file_path:
-            self.image_path = file_path
-            QMessageBox.information(self, "Photo Selected", f"Selected: {file_path}")
+          self.image_path = file_path
+          QMessageBox.information(self, "Photo Selected", f"Selected: {file_path}")
+
 
     def submit_form(self):
         try:
@@ -112,49 +114,41 @@ class AddCriminalWindow(QWidget):
             age = self.age_input.text().strip()
             address = self.address_input.toPlainText().strip()
             crimes = self.crimes_input.toPlainText().strip()
-    
+
             if not name or not age or not address or not crimes:
                 QMessageBox.warning(self, "Validation Error", "Please fill all fields.")
                 return
-    
+
             if not self.image_path:
                 QMessageBox.warning(self, "Validation Error", "Please select a photo.")
                 return
-    
-            face_id = name.lower().replace(" ", "_")
-    
+
+            # Prepare data
             data = {
                 "name": name,
                 "age": age,
                 "address": address,
-                "crimes": crimes,
-                "face_id": face_id
+                "crimes": crimes
             }
-    
-            class DummyFile:
-                def __init__(self, path):
-                    self.filename = f"{face_id}.jpg" 
-                    self.path = path
-    
-                def save(self, dest_path):
-                    from shutil import copyfile
-                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                    copyfile(self.path, dest_path)
-    
-            photo_file = DummyFile(self.image_path)
-            result = add_criminal(name=name, age=age, address=address, crimes=crimes, image_path=self.image_path)
-    
+
+            url = "http://127.0.0.1:5000/add_criminal"
+
+            with open(self.image_path, 'rb') as file:
+                files = {'photo': file}
+                response = requests.post(url, data=data, files=files)
+                result = response.json()
+
             if result["status"] == "success":
                 QMessageBox.information(self, "Success", "Criminal added successfully.")
                 self.go_to_user_profile()
             else:
-                QMessageBox.critical(self, "Error", result["message"])
-    
+                QMessageBox.critical(self, "Error", result.get("message", "Unknown error."))
+
         except Exception as e:
             import traceback
             traceback.print_exc()
             QMessageBox.critical(self, "Exception", str(e))
-        pass
+
     def go_to_user_profile(self):
         from profile_window import ProfileWindow
         self.profile_window = ProfileWindow(username=self.username)
