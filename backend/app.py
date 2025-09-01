@@ -27,7 +27,8 @@ def index():
     return jsonify({"message": "Vision Guard API is running"})
 
 @app.route('/login', methods=['POST'])
-def login():
+def login()
+
     try:
         data = request.json
         if not data:
